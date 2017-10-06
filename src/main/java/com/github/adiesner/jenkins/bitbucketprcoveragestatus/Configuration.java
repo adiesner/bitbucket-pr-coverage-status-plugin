@@ -20,11 +20,11 @@ package com.github.adiesner.jenkins.bitbucketprcoveragestatus;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import lombok.NonNull;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,7 +65,7 @@ public class Configuration extends AbstractDescribableImpl<Configuration> {
             return "Coverage status for GitHub Pull Requests";
         }
 
-        @Nonnull
+        @NonNull
         public Map<String, Float> getCoverageByRepo() {
             return coverageByRepo;
         }

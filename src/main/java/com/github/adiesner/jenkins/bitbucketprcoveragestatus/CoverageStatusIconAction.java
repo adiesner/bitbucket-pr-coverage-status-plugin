@@ -15,8 +15,8 @@ import java.io.IOException;
 public class CoverageStatusIconAction implements UnprotectedRootAction {
 
     public static final String URL_NAME = "stash-coverage-status-icon";
-    private final int baseIconWidth = 70;
-    private final int baseFontXPos = 65;
+    private final static int baseIconWidth = 70;
+    private final static int baseFontXPos = 65;
 
     @Override
     public String getIconFileName() {

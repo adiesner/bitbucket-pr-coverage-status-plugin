@@ -192,6 +192,24 @@
                     <check/>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.5</version>
+                <executions>
+                    <execution>
+                        <id>failing-on-high</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <threshold>High</threshold>
+                            <onlyAnalyze>com.github.adiesner.-</onlyAnalyze>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
