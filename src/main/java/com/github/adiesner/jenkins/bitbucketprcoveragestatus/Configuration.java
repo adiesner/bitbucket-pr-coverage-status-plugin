@@ -62,7 +62,7 @@ public class Configuration extends AbstractDescribableImpl<Configuration> {
 
         @Override
         public String getDisplayName() {
-            return "Coverage status for GitHub Pull Requests";
+            return "Coverage status for Bitbucket cloud Pull Requests";
         }
 
         @Nonnull

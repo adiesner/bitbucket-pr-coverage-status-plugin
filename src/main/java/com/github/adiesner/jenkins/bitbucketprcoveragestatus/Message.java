@@ -21,10 +21,11 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 
 @SuppressWarnings("WeakerAccess")
-class Message {
+public class Message {
 
     //see http://shields.io/ for reference
-    private static final String BADGE_TEMPLATE = "https://img.shields.io/badge/coverage-%s-%s.svg";
+    public static final String SHIELDS_BADGE_COVERAGE_URL = "https://img.shields.io/badge/coverage";
+    private static final String BADGE_TEMPLATE = SHIELDS_BADGE_COVERAGE_URL + "-%s-%s.svg";
 
     private static final String COLOR_RED = "red";
     private static final String COLOR_YELLOW = "yellow";
@@ -57,7 +58,7 @@ class Message {
         final String color = getColor(yellowThreshold, greenThreshold, negativeCoverageIsRed);
 
         if (useShieldsIo) {
-            return "[![" + icon + "](" + shieldIoUrl(icon, color) + ")](" + buildUrl + ")";
+            return "![" + icon + "](" + shieldIoUrl(icon, color) + ") [ Report ] (" + buildUrl + "jacoco)";
         } else {
             return "[![" + icon + "](" + jenkinsUrl + "/" + CoverageStatusIconAction.URL_NAME + "/" +
                     "?coverage=" + coverage +
@@ -72,7 +73,7 @@ class Message {
         // dash should be encoded as two dash
         icon = icon.replace("-", "--");
         try {
-            return String.format(BADGE_TEMPLATE, URIUtil.encodePath(icon), color);
+            return String.format(BADGE_TEMPLATE, URIUtil.encodeAll(icon), color);
         } catch (URIException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +82,7 @@ class Message {
     private String getColor(int yellowThreshold, int greenThreshold, boolean negativeCoverageIsRed) {
         String color = COLOR_GREEN;
         final int coveragePercent = Percent.of(coverage);
-        if (negativeCoverageIsRed && (coverage < masterCoverage) && (coveragePercent < greenThreshold)) {
+        if (negativeCoverageIsRed && (coverage < masterCoverage)/* && (coveragePercent < greenThreshold)*/) {
             color = COLOR_RED;
         } else if (coveragePercent < yellowThreshold) {
             color = COLOR_RED;

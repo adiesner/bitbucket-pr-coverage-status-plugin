@@ -13,10 +13,7 @@
   <f:entry title="Repository Name" field="repositoryName">
     <f:textbox />
   </f:entry>
-    <f:entry title="Ignore SSL" field="ignoreSSL">
-      <f:checkbox default="false"/>
-    </f:entry>
-  <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="bitbucketHost,credentialsId,projectCode,repositoryName,ignoreSSL" />
+  <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="bitbucketHost,credentialsId,projectCode,repositoryName" />
   <f:advanced>
     <f:entry title="Jenkins URL for icon in Pull Request" field="jenkinsUrl">
       <f:textbox default=""/>

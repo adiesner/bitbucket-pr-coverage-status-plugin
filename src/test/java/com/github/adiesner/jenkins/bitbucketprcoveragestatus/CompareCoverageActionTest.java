@@ -218,7 +218,6 @@ public class CompareCoverageActionTest {
         compareCoverageAction.setSonarLogin(sonarLogin);
         compareCoverageAction.setSonarPassword(sonarPassword);
         compareCoverageAction.setDisableSimpleCov(disableSimpleCov);
-        compareCoverageAction.setIgnoreSsl(ignoreSsl);
         compareCoverageAction.setNegativeCoverageIsRed(negativeCoverageIsRed);
         return compareCoverageAction;
     }

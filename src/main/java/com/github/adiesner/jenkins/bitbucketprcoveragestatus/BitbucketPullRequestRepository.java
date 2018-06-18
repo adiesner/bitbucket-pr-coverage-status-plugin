@@ -17,27 +17,27 @@ limitations under the License.
 */
 package com.github.adiesner.jenkins.bitbucketprcoveragestatus;
 
-import com.github.adiesner.jenkins.bitbucketprcoveragestatus.stash.StashApiClient;
-import com.github.adiesner.jenkins.bitbucketprcoveragestatus.stash.StashPullRequestResponseValue;
+import com.github.adiesner.jenkins.bitbucketprcoveragestatus.bitbucket.ApiClient;
+import com.github.adiesner.jenkins.bitbucketprcoveragestatus.bitbucket.Pullrequest;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
 
-public class GitHubPullRequestRepository implements BitbucketApi {
+public class BitbucketPullRequestRepository implements BitbucketApi {
 
-    private final StashApiClient stashApiClient;
+    private final ApiClient bitbucketApiClient;
 
-    public GitHubPullRequestRepository(StashApiClient stashApiClient) {
-        this.stashApiClient = stashApiClient;
+    public BitbucketPullRequestRepository(ApiClient bitbucketApiClient) {
+        this.bitbucketApiClient = bitbucketApiClient;
     }
 
     @Override
     public PullRequest getPullRequestForId(String branch, String sha) throws IOException {
-        final List<StashPullRequestResponseValue> pullRequests = stashApiClient.getPullRequests();
-        for (StashPullRequestResponseValue pullRequest : pullRequests) {
-            if ((StringUtils.equals(pullRequest.getFromRef().getBranch().getName(), branch)) &&
-                ((StringUtils.equals(pullRequest.getFromRef().getCommit().getHash(), sha)))) {
+        final List<Pullrequest> pullRequests = bitbucketApiClient.getPullRequests();
+        for (Pullrequest pullRequest : pullRequests) {
+            if ((StringUtils.equals(pullRequest.getSource().getBranch().getName(), branch)) &&
+                    ((StringUtils.equals(pullRequest.getSource().getCommit().getHash(), sha)))) {
                 return new PullRequest(pullRequest.getId(), pullRequest.getTitle());
             }
         }
@@ -46,7 +46,9 @@ public class GitHubPullRequestRepository implements BitbucketApi {
 
     @Override
     public void comment(final String prId, final String message) throws IOException {
-        stashApiClient.postPullRequestComment(prId, message);
+        List<Pullrequest.Comment> ownComments = bitbucketApiClient.findOwnPullRequestComments(prId);
+        bitbucketApiClient.deletePreviousGlobalComments(prId, ownComments);
+        bitbucketApiClient.postPullRequestComment(prId, message);
     }
 
 }

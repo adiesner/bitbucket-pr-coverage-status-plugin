@@ -20,11 +20,11 @@ package com.github.adiesner.jenkins.bitbucketprcoveragestatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.auth.BasicScheme;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -40,10 +40,11 @@ public class SonarMasterCoverageRepository implements MasterCoverageRepository {
 
     private static final String SONAR_SEARCH_PROJECTS_API_PATH = "/api/projects/index";
     private static final String SONAR_COMPONENT_MEASURE_API_PATH = "/api/measures/component";
-    public static final String SONAR_OVERALL_LINE_COVERAGE_METRIC_NAME = "coverage";
+    public static final String SONAR_OVERALL_LINE_COVERAGE_METRIC_NAME = "line_coverage";
 
     private final String sonarUrl;
     private final String login;
+    private Credentials credentials;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES);
     private PrintStream buildLog;
@@ -54,6 +55,7 @@ public class SonarMasterCoverageRepository implements MasterCoverageRepository {
         this.buildLog = buildLog;
         httpClient = new HttpClient();
         if (login != null) {
+            credentials = new UsernamePasswordCredentials(login, password);
             httpClient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
         }
     }
@@ -92,8 +94,11 @@ public class SonarMasterCoverageRepository implements MasterCoverageRepository {
                 log("Found project for repo name %s - %s", repoName, sonarProjects.get(0));
                 return sonarProjects.get(0);
             } else {
-                log("Found multiple projects for repo name %s - found %s - returning first result", repoName, sonarProjects);
-                return sonarProjects.get(0);
+                log("Found multiple projects for repo name %s - found %s - returning matched by name or first", repoName, sonarProjects);
+                return sonarProjects.stream()
+                        .filter(sonarProject -> sonarProject.getName().equals(repoName))
+                        .findFirst()
+                        .orElse(sonarProjects.get(0));
             }
         } catch (final Exception e) {
             throw new SonarProjectRetrievalException(String.format("failed to search for sonar project %s - %s", repoName, e.getMessage()), e);
@@ -119,8 +124,10 @@ public class SonarMasterCoverageRepository implements MasterCoverageRepository {
 
     private GetMethod executeGetRequest(String uri) throws IOException, HttpClientException {
         final GetMethod method = new GetMethod(uri);
-        if (login != null) {
-            method.getHostAuthState().setAuthScheme(new BasicScheme());
+        if (credentials != null) {
+            httpClient.getState().setCredentials(AuthScope.ANY, credentials);
+            httpClient.getParams().setAuthenticationPreemptive(true);
+//            method.getHostAuthState().setAuthScheme(new BasicScheme());
         }
         int status = httpClient.executeMethod(method);
         if (status >= SC_BAD_REQUEST) {
@@ -143,6 +150,17 @@ public class SonarMasterCoverageRepository implements MasterCoverageRepository {
     private static class SonarProject {
         @JsonProperty("k")
         String key;
+
+        @JsonProperty("nm")
+        String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
 
         String getKey() {
             return key;

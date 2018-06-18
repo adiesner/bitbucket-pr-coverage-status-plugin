@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 
+import static com.github.adiesner.jenkins.bitbucketprcoveragestatus.CompareCoverageAction.BUILD_LOG_PREFIX;
+
 public class PrIdAndUrlUtils {
 
     /**
@@ -62,10 +64,10 @@ public class PrIdAndUrlUtils {
         final PrintStream buildLog = listener.getLogger();
         final String branch = scmVars.get("GIT_BRANCH");
         final String sha = scmVars.get("GIT_COMMIT");
-        buildLog.println(CompareCoverageAction.BUILD_LOG_PREFIX + String.format("Attempt to discover PR for %s @ %s", branch, sha));
+        buildLog.println(BUILD_LOG_PREFIX + String.format("Attempt to discover PR for %s @ %s", branch, sha));
         PullRequest gitPr = ServiceRegistry.getPullRequestRepository().getPullRequestForId(branch, sha);
         int id = Integer.parseInt(gitPr.getId());
-        buildLog.println(CompareCoverageAction.BUILD_LOG_PREFIX + String.format("Discovered PR %d", id));
+        buildLog.println(BUILD_LOG_PREFIX + String.format("Discovered PR %d", id));
         return id;
     }
 
@@ -119,10 +121,8 @@ public class PrIdAndUrlUtils {
     @SneakyThrows
     public static String getGitUrlForTargetBranch(Run build, TaskListener listener) {
         Map<String, String> envVars = build.getEnvironment(listener);
-        final String gitUrl = envVars.get(GIT_URL_PROPERTY);
 
-        String branch = getTargetBranch(envVars);
-        return gitUrl + "#" + branch;
+        return envVars.get(GIT_URL_PROPERTY);
     }
 
 }
