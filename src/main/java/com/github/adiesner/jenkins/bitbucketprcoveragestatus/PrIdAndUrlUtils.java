@@ -125,4 +125,12 @@ public class PrIdAndUrlUtils {
         return envVars.get(GIT_URL_PROPERTY);
     }
 
+    @SneakyThrows
+    public static String getGitUrlForTargetWithBranch(Run build, TaskListener listener) {
+        Map<String, String> envVars = build.getEnvironment(listener);
+        final String gitUrl = envVars.get(GIT_URL_PROPERTY);
+
+        String branch = getTargetBranch(envVars);
+        return gitUrl + "#" + branch;
+    }
 }

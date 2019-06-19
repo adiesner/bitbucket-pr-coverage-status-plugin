@@ -17,6 +17,7 @@ limitations under the License.
 */
 package com.github.adiesner.jenkins.bitbucketprcoveragestatus;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -71,7 +72,10 @@ public class MasterCoverageAction extends Recorder implements SimpleBuildStep {
         final PrintStream buildLog = listener.getLogger();
         final String gitUrl = PrIdAndUrlUtils.getGitUrlWithBranch(build, listener);
 
-        final float masterCoverage = ServiceRegistry.getCoverageRepository(isDisableSimpleCov()).get(workspace);
+        EnvVars envVars = new EnvVars();
+        envVars = build.getEnvironment(listener);
+        // get coverage from jacoco plugin
+        final float masterCoverage = Float.parseFloat(envVars.get("lineCoverage")) / 100; // ServiceRegistry.getCoverageRepository(isDisableSimpleCov()).get(workspace);
         buildLog.println("Master coverage " + Percent.toWholeString(masterCoverage) + " for " + gitUrl);
         Configuration.setMasterCoverage(gitUrl, masterCoverage);
     }

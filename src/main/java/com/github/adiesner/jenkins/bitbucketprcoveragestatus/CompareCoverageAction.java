@@ -197,13 +197,14 @@ public class CompareCoverageAction extends Recorder implements SimpleBuildStep {
                 new BitbucketPullRequestRepository(getBitbucketApiClient(bitbucketHost, credentialsId, projectCode, repositoryName))
         );
 
+        final String targetBranch = PrIdAndUrlUtils.getTargetBranch(build.getEnvironment(listener));
         final int prId = PrIdAndUrlUtils.getPrId(scmVars, build, listener);
-        final String gitUrl = PrIdAndUrlUtils.getGitUrlForTargetBranch(build, listener);
+        final String gitMasterUrl = useSonarForMasterCoverage ? PrIdAndUrlUtils.getGitUrlForTargetBranch(build, listener) : PrIdAndUrlUtils.getGitUrlForTargetWithBranch(build, listener);
 
-        buildLog.println(BUILD_LOG_PREFIX + "Getting reference coverage for " + gitUrl);
+        buildLog.println(BUILD_LOG_PREFIX + "Getting reference coverage for " + gitMasterUrl);
         MasterCoverageRepository masterCoverageRepository = ServiceRegistry
                 .getMasterCoverageRepository(buildLog, isUseSonarForMasterCoverage(), getSonarUrl(), getSonarLogin(), getSonarPassword(), getSonarToken());
-        final float masterCoverage = masterCoverageRepository.get(gitUrl);
+        final float masterCoverage = masterCoverageRepository.get(gitMasterUrl);
         buildLog.println(BUILD_LOG_PREFIX + "Master coverage: " + masterCoverage);
 
         buildLog.println(BUILD_LOG_PREFIX + "Collecting coverage...");
@@ -212,7 +213,6 @@ public class CompareCoverageAction extends Recorder implements SimpleBuildStep {
         final float coverage = Float.parseFloat(envVars.get("lineCoverage")) / 100; // ServiceRegistry.getCoverageRepository(isDisableSimpleCov()).get(workspace);
         buildLog.println(BUILD_LOG_PREFIX + "Build coverage: " + coverage);
 
-        final String targetBranch = PrIdAndUrlUtils.getTargetBranch(build.getEnvironment(listener));
         buildLog.println(BUILD_LOG_PREFIX + "Target branch: " + targetBranch);
         final Message message = new Message(coverage, masterCoverage, targetBranch);
         buildLog.println(BUILD_LOG_PREFIX + message.forConsole());
